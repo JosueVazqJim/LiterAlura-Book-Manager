@@ -6,7 +6,7 @@ public class Main {
 	private APIFetcher fetchAPI = new APIFetcher();
 
 	public void menu() {
-		var json = fetchAPI.obtenerDatos("https://gutendex.com/books?search=pride");
+		var json = fetchAPI.obtenerDatos("https://gutendex.com/books/?search=pride");
 		System.out.printf("JSON: %s\n", json);
 	}
 }
