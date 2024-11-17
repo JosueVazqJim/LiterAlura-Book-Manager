@@ -1,17 +1,14 @@
 package org.vazquezj.literalura.main;
 
 import org.vazquezj.literalura.models.Book;
-import org.vazquezj.literalura.models.DataBook;
 import org.vazquezj.literalura.models.DataResponse;
+import org.vazquezj.literalura.repository.BookRepository;
 import org.vazquezj.literalura.service.APIFetcher;
 import org.vazquezj.literalura.service.DataConverter;
 
 import java.net.URLEncoder;
-import java.util.InputMismatchException;
-import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class Main {
 	private Scanner scanner = new Scanner(System.in);
@@ -19,6 +16,12 @@ public class Main {
 	private DataConverter dataConverter = new DataConverter();
 	// Constantes
 	private static final String URL_BASE = "https://gutendex.com/books/?search=";
+	//dependencias
+	private BookRepository repository;
+
+	public Main(BookRepository repository) {
+		this.repository = repository;
+	}
 
 	public void menu() {
 		String opcion;
@@ -29,6 +32,9 @@ public class Main {
 			switch (opcion) {
 				case "1":
 					buscarLibro();
+					break;
+				case "2":
+					mostrarLibrosDB();
 					break;
 				case "0":
 					System.out.println("Cerrando la aplicación...");
@@ -41,6 +47,8 @@ public class Main {
 
 	private void mostrarMenu() {
 		String menu = """
+                
+                
                 *************************************************************
                 *                                                           *
                 *       BIENVENIDO A LA APLICACIÓN DE LITERATURA            *
@@ -48,6 +56,7 @@ public class Main {
                 *************************************************************
                 
                 1 - Buscar libro (se guarda en la base de datos si no existe aún)
+                2. Mostrar libros guardados en la base de datos
                 0 - Salir
                 
                 Por favor, ingrese el número de la opción deseada: """;
@@ -64,10 +73,18 @@ public class Main {
 					.findFirst()
 					.map(dr -> new Book(dr));
 
-			System.out.printf("Libro encontrado: %s%n", bookOp.get());
+			System.out.printf(bookOp.get().toString());
+			// Guardamos el libro en la base de datos
+			Book book = bookOp.get();
+			repository.save(book);
 		} else {
 			System.out.println("No ha ingresado ningún título. Intente de nuevo.");
 		}
+	}
+
+	private void mostrarLibrosDB() {
+		System.out.println("Libros guardados en la base de datos:");
+		repository.findAll().forEach(System.out::println);
 	}
 
 	private String getDataFromAPI(String search) {
@@ -82,4 +99,6 @@ public class Main {
 		T dataParser = dataConverter.convertData(json, clase);
 		return dataParser;
 	}
+
+
 }
