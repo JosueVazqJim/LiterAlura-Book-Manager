@@ -9,27 +9,17 @@ import org.vazquezj.literalura.service.APIFetcher;
 import org.vazquezj.literalura.service.DataConverter;
 
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
 	private Scanner scanner = new Scanner(System.in);
 	private static APIFetcher fetchAPI = new APIFetcher();
 	private DataConverter dataConverter = new DataConverter();
-	// Constantes
 	private static final String URL_BASE = "https://gutendex.com/books/?search=";
-	//dependencias
 	private AuthorRepository repository;
-	//variables para guardar libros y autores buscados
-	private List<Book> books;
-	private List<Author> authors;
 
 	public Main(AuthorRepository repository) {
 		this.repository = repository;
-		this.books = new ArrayList<>();
-		this.authors = new ArrayList<>();
 	}
 
 	public void menu() {
@@ -37,29 +27,7 @@ public class Main {
 		do {
 			mostrarMenu();
 			opcion = scanner.nextLine();  // Leemos toda la línea y eliminamos espacios en blanco.
-
-			switch (opcion) {
-				case "1":
-					buscarLibro();
-					break;
-				case "2":
-					mostrarLibrosDB();
-					break;
-				case "3":
-					mostrarAutoresDB();
-					break;
-				case "4":
-					mostrarAutoresXAnio();
-					break;
-				case "5":
-					mostrarLibrosXIdioma();
-					break;
-				case "0":
-					System.out.println("Cerrando la aplicación...");
-					break;
-				default:
-					System.out.println("Opción inválida, por favor intente de nuevo.");
-			}
+			manejarOpcion(opcion);
 		} while (!opcion.equals("0"));
 	}
 
@@ -72,58 +40,104 @@ public class Main {
                 *       BIENVENIDO A LA APLICACIÓN DE LITERATURA            *
                 *                                                           *
                 *************************************************************
-                
                 1 - Buscar libro (se guarda en la base de datos si no existe aún)
                 2 - Mostrar libros guardados en la base de datos
                 3 - Mostrar autores guardados en la base de datos
                 4 - Mostrar autores vivos en un año específico
                 5 - Mostrar libros por idioma
+                6 - Ver estadisticas de libros
                 0 - Salir
-                
                 Por favor, ingrese el número de la opción deseada:""";
 		System.out.println(menu);
 	}
 
+	private void manejarOpcion(String opcion) {
+		switch (opcion) {
+			case "1":
+				buscarLibro();
+				break;
+			case "2":
+				mostrarLibrosDB();
+				break;
+			case "3":
+				mostrarAutoresDB();
+				break;
+			case "4":
+				mostrarAutoresXAnio();
+				break;
+			case "5":
+				mostrarLibrosXIdioma();
+				break;
+			case "6":
+				mostrarEstadisticas();
+				break;
+			case "0":
+				System.out.println("Cerrando la aplicación...");
+				break;
+			default:
+				System.out.println("Opción inválida, por favor intente de nuevo.");
+		}
+	}
+
 	private void buscarLibro() {
 		System.out.println("Ingrese el nombre del libro que desea buscar:");
-		String tituloLibro = scanner.nextLine();  // Obtenemos el nombre del libro
+		String tituloLibro = scanner.nextLine();
 		if (!tituloLibro.isEmpty()) {
-			String json = getDataFromAPI(tituloLibro);  // Obtenemos la respuesta del API
-			DataResponse dataResponse = parseResponse(json, DataResponse.class);  // Parseamos la respuesta
-			Optional<Book> bookOp = dataResponse.results().stream()
-					.findFirst()
-					.map(Book::new);
-
-			Optional<Author> authorOp = dataResponse.results().stream()
-					.findFirst()
-					.map(dr -> {
-						String authorName = dr.authors().get(0).name();
-						return repository.findByName(authorName)
-								.orElseGet(() -> new Author(dr.authors().get(0)));
-					});
+			String json = obtenerDatosDeAPI(tituloLibro);
+			DataResponse dataResponse = parsearRespuesta(json, DataResponse.class);
+			Optional<Book> bookOp = extraerPrimerLibro(dataResponse);
+			Optional<Author> authorOp = extraerPrimerAutor(dataResponse);
 
 			if (bookOp.isPresent() && authorOp.isPresent()) {
 				Book book = bookOp.get();
 				Author author = authorOp.get();
-				book.setAuthor(author);
-
-				// Check if the book already exists
-				boolean bookExists = author.getBooks().stream()
-						.anyMatch(b -> b.getTitle().equals(book.getTitle()));
-
-				if (!bookExists) {
-					author.getBooks().add(book);
-					repository.save(author);
-					System.out.println(book);
-					System.out.println("Libro encontrado y guardado en la base de datos.");
-				} else {
-					System.out.println("El libro ya existe en la base de datos.");
-				}
+				asociarLibroYAutor(book, author);
 			} else {
 				System.out.println("No se encontró ningún libro con ese título.");
 			}
 		} else {
 			System.out.println("No ha ingresado ningún título. Intente de nuevo.");
+		}
+	}
+
+	private String obtenerDatosDeAPI(String search) {
+		String encoded = URLEncoder.encode(search, java.nio.charset.StandardCharsets.UTF_8);
+		String url = URL_BASE + encoded;
+		return fetchAPI.obtenerDatos(url);  // Llamamos al API
+	}
+
+	private <T> T parsearRespuesta(String json, Class<T> clase) {
+		return dataConverter.convertData(json, clase);
+	}
+
+	private Optional<Book> extraerPrimerLibro(DataResponse dataResponse) {
+		return dataResponse.results().stream()
+				.findFirst()
+				.map(Book::new);
+	}
+
+	private Optional<Author> extraerPrimerAutor(DataResponse dataResponse) {
+		return dataResponse.results().stream()
+				.findFirst()
+				.map(dr -> {
+					String authorName = dr.authors().get(0).name();
+					return repository.findByName(authorName)
+							.orElseGet(() -> new Author(dr.authors().get(0)));
+				});
+	}
+
+	private void asociarLibroYAutor(Book book, Author author) {
+		book.setAuthor(author);
+		boolean bookExists = author.getBooks().stream()
+				.anyMatch(b -> b.getTitle().equals(book.getTitle()));
+
+		if (!bookExists) {
+			author.getBooks().add(book);
+			repository.save(author);
+			System.out.println(book);
+			System.out.println("Libro encontrado y guardado en la base de datos.");
+		} else {
+			System.out.println("El libro ya existe en la base de datos.");
 		}
 	}
 
@@ -182,18 +196,47 @@ public class Main {
 		}
 	}
 
-	private String getDataFromAPI(String search) {
-		String encoded = URLEncoder.encode(search, java.nio.charset.StandardCharsets.UTF_8);
-		String url = URL_BASE + encoded;
-		String json = fetchAPI.obtenerDatos(url);  // Llamamos al API
-		return json;
+	private void mostrarEstadisticas() {
+		// Mostrar el número de libros y autores
+		long numLibros = repository.countBooks();
+		long numAutores = repository.countAuthors();
+
+		System.out.println("Estadísticas generales:");
+		System.out.println("Número de libros registrados: " + numLibros);
+		System.out.println("Número de autores registrados: " + numAutores);
+
+		// Estadísticas sobre las descargas de los libros
+		mostrarEstadisticasDeDescargas();
+
+		// Mostrar el autor con más libros
+		Author topAuthor = repository.findAuthorWithMostBooks().stream().findFirst().orElse(null);
+		if (topAuthor != null) {
+			System.out.println("Autor con más libros: " + topAuthor.getName() + " (" + topAuthor.getBooks().size() + " libros)");
+		} else {
+			System.out.println("No hay autores registrados.");
+		}
+
+		// Mostrar el libro con más descargas
+		Book topBook = repository.findBookWithMostDownloads().stream().findFirst().orElse(null);
+		if (topBook != null) {
+			System.out.println("Libro con más descargas: " + topBook.getTitle() + " (" + topBook.getDownloadCount() + " descargas)");
+		} else {
+			System.out.println("No hay libros registrados.");
+		}
 	}
 
-	//metodo para hacer el parseo de la respuesta a un DTO de llegada
-	private <T> T parseResponse(String json, Class<T> clase) {
-		T dataParser = dataConverter.convertData(json, clase);
-		return dataParser;
+	private void mostrarEstadisticasDeDescargas() {
+		List<Book> allBooks = repository.findAllBooks();  // Obtener todos los libros
+
+		// Usamos DoubleSummaryStatistics para obtener estadísticas de las descargas
+		DoubleSummaryStatistics stats = allBooks.stream()
+				.mapToDouble(book -> book.getDownloadCount() != null ? book.getDownloadCount() : 0)  // Convertimos a double
+				.summaryStatistics();  // Calculamos las estadísticas
+
+		System.out.println("Estadísticas de descargas:");
+		System.out.println("Total de descargas: " + stats.getSum());
+		System.out.println("Promedio de descargas por libro: " + stats.getAverage());
+		System.out.println("Máxima cantidad de descargas: " + stats.getMax());
+		System.out.println("Mínima cantidad de descargas: " + stats.getMin());
 	}
-
-
 }

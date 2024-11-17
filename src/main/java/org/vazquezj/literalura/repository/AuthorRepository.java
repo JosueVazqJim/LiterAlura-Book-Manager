@@ -23,4 +23,16 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
 	List<Book> findAllBooks();
 
 	Optional<Author> findByName(String authorName);
+
+	@Query("SELECT COUNT(b) FROM Book b")
+	long countBooks();
+
+	@Query("SELECT COUNT(a) FROM Author a")
+	long countAuthors();
+
+	@Query("SELECT a FROM Author a WHERE SIZE(a.books) = (SELECT MAX(SIZE(a.books)) FROM Author a)")
+	List<Author> findAuthorWithMostBooks();
+
+	@Query("SELECT b FROM Book b WHERE b.downloadCount = (SELECT MAX(b.downloadCount) FROM Book b) ORDER BY b.id ASC")
+	List<Book> findBookWithMostDownloads();
 }
