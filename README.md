@@ -2,6 +2,20 @@
 
 **LiterAlura** is a book catalog app built with **Java Spring Boot** that allows users to search, filter, and display book information from an external API. The app stores the data in a **PostgreSQL** database and offers a text-based console interface with interactive options.
 
+<p align="left">
+	<img src="https://img.shields.io/github/license/JosueVazqJim/LiterAlura-Book-Manager?style=for-the-badge&logo=opensourceinitiative&logoColor=white&color=e00e8b" alt="license">
+	<img src="https://img.shields.io/github/last-commit/JosueVazqJim/LiterAlura-Book-Manager?style=for-the-badge&logo=git&logoColor=white&color=e00e8b" alt="last-commit">
+	<img src="https://img.shields.io/github/languages/top/JosueVazqJim/LiterAlura-Book-Manager?style=for-the-badge&color=e00e8b" alt="repo-top-language">
+	<img src="https://img.shields.io/github/languages/count/JosueVazqJim/LiterAlura-Book-Manager?style=for-the-badge&color=e00e8b" alt="repo-language-count">
+</p>
+<p align="left">Built with the tools and technologies:</p>
+<p align="left">
+	<img src="https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white" alt="java">
+	<img src="https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white" alt="spring">
+	<img src="https://img.shields.io/badge/PostgreSQL-%23336791.svg?style=for-the-badge&logo=postgresql&logoColor=white" alt="postgresql">
+	<img src="https://img.shields.io/badge/Jackson-%23F7B200.svg?style=for-the-badge&logo=jackson&logoColor=white" alt="jackson">
+</p>
+
 ## 🚀 Technologies Used
 
 - **Java JDK**: Version 17 or higher
