@@ -17,6 +17,25 @@
 - Interact with the catalog via the console with at least **5 different options** (search, filter, view book details, etc.).
 - Display information about books and authors that match your interests.
 
+## 📸 Screenshots
+
+### App Menu:
+![Menú de la terminal](images/menu.png)
+
+### Search for a book:
+![Buscar libro](images/buscarLibro.png)
+
+### List saved books:
+![Listar libros guardados](images/LibrosGuardados.png)
+
+### Filter books by language:
+![Mostrar libros](images/listarLibrosIdioma.png)
+
+![Mostrar libros](images/listarLibrosIdioma2.png)
+
+### Show statistics:
+![Mostrar estadísticas](images/estadisticas.png)
+
 ## 🛠️ How to Run
 
 ### 📋 Prerequisites
