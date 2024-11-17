@@ -24,6 +24,22 @@ public class Author {
 		this.book = book;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public Integer getBirthYear() {
+		return birthYear;
+	}
+
+	public Integer getDeathYear() {
+		return deathYear;
+	}
+
+	public Book getBook() {
+		return book;
+	}
+
 	@Override
 	public String toString() {
 		return "\t" + name;

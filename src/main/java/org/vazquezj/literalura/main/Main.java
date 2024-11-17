@@ -1,5 +1,6 @@
 package org.vazquezj.literalura.main;
 
+import org.vazquezj.literalura.models.Author;
 import org.vazquezj.literalura.models.Book;
 import org.vazquezj.literalura.models.DataResponse;
 import org.vazquezj.literalura.repository.BookRepository;
@@ -7,6 +8,8 @@ import org.vazquezj.literalura.service.APIFetcher;
 import org.vazquezj.literalura.service.DataConverter;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -18,9 +21,14 @@ public class Main {
 	private static final String URL_BASE = "https://gutendex.com/books/?search=";
 	//dependencias
 	private BookRepository repository;
+	//variables para guardar libros y autores buscados
+	private List<Book> books;
+	private List<Author> authors;
 
 	public Main(BookRepository repository) {
 		this.repository = repository;
+		this.books = new ArrayList<>();
+		this.authors = new ArrayList<>();
 	}
 
 	public void menu() {
@@ -35,6 +43,9 @@ public class Main {
 					break;
 				case "2":
 					mostrarLibrosDB();
+					break;
+				case "3":
+					mostrarAutoresDB();
 					break;
 				case "0":
 					System.out.println("Cerrando la aplicación...");
@@ -56,7 +67,8 @@ public class Main {
                 *************************************************************
                 
                 1 - Buscar libro (se guarda en la base de datos si no existe aún)
-                2. Mostrar libros guardados en la base de datos
+                2 - Mostrar libros guardados en la base de datos
+                3 - Mostrar autores guardados en la base de datos
                 0 - Salir
                 
                 Por favor, ingrese el número de la opción deseada: """;
@@ -76,6 +88,10 @@ public class Main {
 			System.out.printf(bookOp.get().toString());
 			// Guardamos el libro en la base de datos
 			Book book = bookOp.get();
+
+			books.add(book);
+			authors.addAll(book.getAuthors());
+
 			repository.save(book);
 		} else {
 			System.out.println("No ha ingresado ningún título. Intente de nuevo.");
@@ -85,6 +101,11 @@ public class Main {
 	private void mostrarLibrosDB() {
 		System.out.println("Libros guardados en la base de datos:");
 		repository.findAll().forEach(System.out::println);
+	}
+
+	private void mostrarAutoresDB() {
+		System.out.println("Autores guardados en la base de datos:");
+		repository.findAllAuthors().forEach(System.out::println);
 	}
 
 	private String getDataFromAPI(String search) {

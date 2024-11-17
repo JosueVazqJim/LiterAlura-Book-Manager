@@ -28,6 +28,26 @@ public class Book {
 		this.downloadCount = dbook.download_count();
 	}
 
+	public Integer getId() {
+		return id;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public List<Author> getAuthors() {
+		return authors;
+	}
+
+	public Language getLanguages() {
+		return languages;
+	}
+
+	public Integer getDownloadCount() {
+		return downloadCount;
+	}
+
 	@Override
 	public String toString() {
 		return "--------------------" + "\n" +
