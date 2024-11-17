@@ -4,7 +4,7 @@ import org.vazquezj.literalura.models.Author;
 import org.vazquezj.literalura.models.Book;
 import org.vazquezj.literalura.models.DataResponse;
 import org.vazquezj.literalura.models.Language;
-import org.vazquezj.literalura.repository.BookRepository;
+import org.vazquezj.literalura.repository.AuthorRepository;
 import org.vazquezj.literalura.service.APIFetcher;
 import org.vazquezj.literalura.service.DataConverter;
 
@@ -21,12 +21,12 @@ public class Main {
 	// Constantes
 	private static final String URL_BASE = "https://gutendex.com/books/?search=";
 	//dependencias
-	private BookRepository repository;
+	private AuthorRepository repository;
 	//variables para guardar libros y autores buscados
 	private List<Book> books;
 	private List<Author> authors;
 
-	public Main(BookRepository repository) {
+	public Main(AuthorRepository repository) {
 		this.repository = repository;
 		this.books = new ArrayList<>();
 		this.authors = new ArrayList<>();
@@ -92,14 +92,33 @@ public class Main {
 			DataResponse dataResponse = parseResponse(json, DataResponse.class);  // Parseamos la respuesta
 			Optional<Book> bookOp = dataResponse.results().stream()
 					.findFirst()
-					.map(dr -> new Book(dr));
+					.map(Book::new);
 
-			if (bookOp.isPresent()) {
+			Optional<Author> authorOp = dataResponse.results().stream()
+					.findFirst()
+					.map(dr -> {
+						String authorName = dr.authors().get(0).name();
+						return repository.findByName(authorName)
+								.orElseGet(() -> new Author(dr.authors().get(0)));
+					});
+
+			if (bookOp.isPresent() && authorOp.isPresent()) {
 				Book book = bookOp.get();
-				books.add(book);
-				authors.addAll(book.getAuthors());
-				repository.save(book);
-				System.out.println("Libro encontrado y guardado en la base de datos.");
+				Author author = authorOp.get();
+				book.setAuthor(author);
+
+				// Check if the book already exists
+				boolean bookExists = author.getBooks().stream()
+						.anyMatch(b -> b.getTitle().equals(book.getTitle()));
+
+				if (!bookExists) {
+					author.getBooks().add(book);
+					repository.save(author);
+					System.out.println(book);
+					System.out.println("Libro encontrado y guardado en la base de datos.");
+				} else {
+					System.out.println("El libro ya existe en la base de datos.");
+				}
 			} else {
 				System.out.println("No se encontró ningún libro con ese título.");
 			}
@@ -110,7 +129,7 @@ public class Main {
 
 	private void mostrarLibrosDB() {
 		System.out.println("Libros guardados en la base de datos:");
-		List<Book> books = repository.findAll();
+		List<Book> books = repository.findAllBooks();
 		if (books.isEmpty()) {
 			System.out.println("No hay libros guardados en la base de datos.");
 		} else {

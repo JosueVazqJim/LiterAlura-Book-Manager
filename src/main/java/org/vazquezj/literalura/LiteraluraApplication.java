@@ -5,14 +5,14 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.vazquezj.literalura.main.Main;
-import org.vazquezj.literalura.repository.BookRepository;
+import org.vazquezj.literalura.repository.AuthorRepository;
 
 @SpringBootApplication
 public class LiteraluraApplication implements CommandLineRunner {
 
 	//inyection de dependencias de tipo: type-based injection
 	@Autowired
-	private BookRepository repository;
+	private AuthorRepository repository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(LiteraluraApplication.class, args);

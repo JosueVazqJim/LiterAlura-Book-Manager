@@ -12,8 +12,8 @@ public class Book {
 	@Column(unique = true)
 	private Integer id;
 	private String title;
-	@OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-	private List<Author> authors;
+	@ManyToOne
+	private Author author;
 	@Enumerated(EnumType.STRING)
 	private Language languages;
 	private Integer downloadCount;
@@ -24,7 +24,6 @@ public class Book {
 	public Book(DataBook dbook) {
 		this.id = dbook.id();
 		this.title = dbook.title();
-		this.authors = dbook.authors().stream().map(dauthor -> new Author(dauthor, this)).toList();
 		this.languages = dbook.languages().stream().findFirst().map(code -> Language.fromCode(code)).orElse(null);
 		this.downloadCount = dbook.download_count();
 	}
@@ -37,8 +36,8 @@ public class Book {
 		return title;
 	}
 
-	public List<Author> getAuthors() {
-		return authors;
+	public Author getAuthor() {
+		return author;
 	}
 
 	public Language getLanguages() {
@@ -49,11 +48,15 @@ public class Book {
 		return downloadCount;
 	}
 
+	public void setAuthor(Author author) {
+		this.author = author;
+	}
+
 	@Override
 	public String toString() {
 		return "--------------------" + "\n" +
 				"Título: '" + title + '\'' + "\n" +
-				"Autores: " + authors.stream().map(a -> a.getName()).collect(Collectors.joining(" | ")) + "\n" +
+				"Autores: " + author.getName() + "\n" +
 				"Idima: " + languages + "\n" +
 				"Cantidad de descargas: " + downloadCount + "\n" +
 				"--------------------";

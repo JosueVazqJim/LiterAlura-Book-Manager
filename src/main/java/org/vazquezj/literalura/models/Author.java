@@ -2,6 +2,10 @@ package org.vazquezj.literalura.models;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Entity
 @Table(name = "authors")
 public class Author {
@@ -12,17 +16,16 @@ public class Author {
 	private String name;
 	private Integer birthYear;
 	private Integer deathYear;
-	@ManyToOne
-	private Book book;
+	@OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	private List<Book> books = new ArrayList<>();
 
 	public Author() {
 	}
 
-	public Author(DataAuthor dauthor, Book book) {
+	public Author(DataAuthor dauthor) {
 		this.name = dauthor.name();
 		this.birthYear = dauthor.birth_date();
 		this.deathYear = dauthor.death_date();
-		this.book = book;
 	}
 
 	public String getName() {
@@ -37,16 +40,20 @@ public class Author {
 		return deathYear;
 	}
 
-	public Book getBook() {
-		return book;
+	public List<Book> getBooks() {
+		return books;
 	}
 
 	@Override
 	public String toString() {
+		String booksString = books.stream()
+				.map(Book::getTitle)
+				.collect(Collectors.joining(", "));
 		return "-----------------------------"
 				+ "\n" + "Nombre: " + name
 				+ "\n" + "Año de nacimiento: " + birthYear
 				+ "\n" + "Año de defunción: " + deathYear
+				+ "\n" + "Libros: " + booksString
 				+ "\n----------------------------";
 	}
 }
