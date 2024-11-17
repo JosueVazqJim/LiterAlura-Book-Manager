@@ -47,6 +47,9 @@ public class Main {
 				case "3":
 					mostrarAutoresDB();
 					break;
+				case "4":
+					mostrarAutoresXAnio();
+					break;
 				case "0":
 					System.out.println("Cerrando la aplicación...");
 					break;
@@ -69,6 +72,7 @@ public class Main {
                 1 - Buscar libro (se guarda en la base de datos si no existe aún)
                 2 - Mostrar libros guardados en la base de datos
                 3 - Mostrar autores guardados en la base de datos
+                4 - Mostrar autores vivos en un año específico
                 0 - Salir
                 
                 Por favor, ingrese el número de la opción deseada: """;
@@ -93,6 +97,7 @@ public class Main {
 			authors.addAll(book.getAuthors());
 
 			repository.save(book);
+			System.out.printf("\nLibro guardado en la base de datos: %s%n", book.getTitle());
 		} else {
 			System.out.println("No ha ingresado ningún título. Intente de nuevo.");
 		}
@@ -100,12 +105,39 @@ public class Main {
 
 	private void mostrarLibrosDB() {
 		System.out.println("Libros guardados en la base de datos:");
-		repository.findAll().forEach(System.out::println);
+		List<Book> books = repository.findAll();
+		if (books.isEmpty()) {
+			System.out.println("No hay libros guardados en la base de datos.");
+		} else {
+			books.forEach(System.out::println);
+		}
 	}
 
 	private void mostrarAutoresDB() {
 		System.out.println("Autores guardados en la base de datos:");
-		repository.findAllAuthors().forEach(System.out::println);
+		List<Author> authors = repository.findAllAuthors();
+		if (authors.isEmpty()) {
+			System.out.println("No hay autores guardados en la base de datos.");
+		} else {
+			authors.forEach(System.out::println);
+		}
+	}
+
+	private void mostrarAutoresXAnio() {
+		System.out.println("Ingrese el año del que desea ver los autores vivos:");
+		String anio = scanner.nextLine();
+		try {
+			int year = Integer.parseInt(anio);
+			List<Author> authors = repository.findAuthorsByYear(year);
+			if (authors.isEmpty()) {
+				System.out.printf("No hay autores vivos en el año %d.%n", year);
+			} else {
+				System.out.printf("Autores vivos en el año %d:%n", year);
+				authors.forEach(System.out::println);
+			}
+		} catch (NumberFormatException e) {
+			System.out.println("El valor ingresado no es un año válido. Por favor, ingrese un número.");
+		}
 	}
 
 	private String getDataFromAPI(String search) {

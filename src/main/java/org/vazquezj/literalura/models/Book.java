@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 @Table(name = "books")
 public class Book {
 	@Id
+	@Column(unique = true)
 	private Integer id;
 	private String title;
 	@OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -52,7 +53,7 @@ public class Book {
 	public String toString() {
 		return "--------------------" + "\n" +
 				"Título: '" + title + '\'' + "\n" +
-				"Autores: " + authors.stream().map(Author::toString).collect(Collectors.joining(" | ")) + "\n" +
+				"Autores: " + authors.stream().map(a -> a.getName()).collect(Collectors.joining(" | ")) + "\n" +
 				"Idima: " + languages + "\n" +
 				"Cantidad de descargas: " + downloadCount + "\n" +
 				"--------------------";

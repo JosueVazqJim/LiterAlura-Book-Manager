@@ -8,6 +8,7 @@ public class Author {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
+	@Column(unique = true) //se indica que el nombre es unico y no se puede repetir
 	private String name;
 	private Integer birthYear;
 	private Integer deathYear;
@@ -42,6 +43,10 @@ public class Author {
 
 	@Override
 	public String toString() {
-		return "\t" + name;
+		return "-----------------------------"
+				+ "\n" + "Nombre: " + name
+				+ "\n" + "Año de nacimiento: " + birthYear
+				+ "\n" + "Año de defunción: " + deathYear
+				+ "\n----------------------------";
 	}
 }
