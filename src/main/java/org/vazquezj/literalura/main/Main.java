@@ -3,6 +3,7 @@ package org.vazquezj.literalura.main;
 import org.vazquezj.literalura.models.Author;
 import org.vazquezj.literalura.models.Book;
 import org.vazquezj.literalura.models.DataResponse;
+import org.vazquezj.literalura.models.Language;
 import org.vazquezj.literalura.repository.BookRepository;
 import org.vazquezj.literalura.service.APIFetcher;
 import org.vazquezj.literalura.service.DataConverter;
@@ -50,6 +51,9 @@ public class Main {
 				case "4":
 					mostrarAutoresXAnio();
 					break;
+				case "5":
+					mostrarLibrosXIdioma();
+					break;
 				case "0":
 					System.out.println("Cerrando la aplicación...");
 					break;
@@ -73,9 +77,10 @@ public class Main {
                 2 - Mostrar libros guardados en la base de datos
                 3 - Mostrar autores guardados en la base de datos
                 4 - Mostrar autores vivos en un año específico
+                5 - Mostrar libros por idioma
                 0 - Salir
                 
-                Por favor, ingrese el número de la opción deseada: """;
+                Por favor, ingrese el número de la opción deseada:""";
 		System.out.println(menu);
 	}
 
@@ -89,15 +94,15 @@ public class Main {
 					.findFirst()
 					.map(dr -> new Book(dr));
 
-			System.out.printf(bookOp.get().toString());
-			// Guardamos el libro en la base de datos
-			Book book = bookOp.get();
-
-			books.add(book);
-			authors.addAll(book.getAuthors());
-
-			repository.save(book);
-			System.out.printf("\nLibro guardado en la base de datos: %s%n", book.getTitle());
+			if (bookOp.isPresent()) {
+				Book book = bookOp.get();
+				books.add(book);
+				authors.addAll(book.getAuthors());
+				repository.save(book);
+				System.out.println("Libro encontrado y guardado en la base de datos.");
+			} else {
+				System.out.println("No se encontró ningún libro con ese título.");
+			}
 		} else {
 			System.out.println("No ha ingresado ningún título. Intente de nuevo.");
 		}
@@ -137,6 +142,24 @@ public class Main {
 			}
 		} catch (NumberFormatException e) {
 			System.out.println("El valor ingresado no es un año válido. Por favor, ingrese un número.");
+		}
+	}
+
+	private void mostrarLibrosXIdioma() {
+		int op = -1;
+		Language.showLanguages();
+		do {
+			System.out.println("Seleccione el idioma del que desea ver los libros:");
+			op = scanner.nextInt();
+			scanner.nextLine(); // Consume the newline character
+		} while (op < 0 || op > Language.values().length);
+		Language language = Language.values()[op - 1];
+		List<Book> books = repository.findBooksByLanguage(language);
+		if (books.isEmpty()) {
+			System.out.println("No hay libros guardados en la base de datos del idioma " + language);
+		} else {
+			System.out.println("Libros guardados en la base de datos del idioma " + language);
+			books.forEach(System.out::println);
 		}
 	}
 

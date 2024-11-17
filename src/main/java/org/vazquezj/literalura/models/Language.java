@@ -30,4 +30,13 @@ public enum Language {
 		}
 		throw new IllegalArgumentException("Invalid code: " + code);
 	}
+
+	//mostrar todos los idiomas
+	public static void showLanguages() {
+		int n = 1;
+		for (Language language : Language.values()) {
+			System.out.println(n + ".- " + language);
+			n++;
+		}
+	}
 }
