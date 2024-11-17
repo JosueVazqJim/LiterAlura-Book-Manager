@@ -9,7 +9,7 @@ import java.util.List;
 public record DataBook(
 		@JsonAlias("id") Integer id,
 		@JsonAlias("title") String title,
-		@JsonAlias("authors") List<DataAuthor> author,
+		@JsonAlias("authors") List<DataAuthor> authors,
 		@JsonAlias("languages") List<String> languages,
 		@JsonAlias("download_count") Integer download_count
 ) {

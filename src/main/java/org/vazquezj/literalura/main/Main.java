@@ -1,5 +1,6 @@
 package org.vazquezj.literalura.main;
 
+import org.vazquezj.literalura.models.Book;
 import org.vazquezj.literalura.models.DataBook;
 import org.vazquezj.literalura.models.DataResponse;
 import org.vazquezj.literalura.service.APIFetcher;
@@ -7,7 +8,10 @@ import org.vazquezj.literalura.service.DataConverter;
 
 import java.net.URLEncoder;
 import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Main {
 	private Scanner scanner = new Scanner(System.in);
@@ -55,9 +59,12 @@ public class Main {
 		String tituloLibro = scanner.nextLine();  // Obtenemos el nombre del libro
 		if (!tituloLibro.isEmpty()) {
 			String json = getDataFromAPI(tituloLibro);  // Obtenemos la respuesta del API
-			System.out.println(json);  // Mostramos la respuesta
 			DataResponse dataResponse = parseResponse(json, DataResponse.class);  // Parseamos la respuesta
-			System.out.println(dataResponse);  // Mostramos la respuesta parseada
+			Optional<Book> bookOp = dataResponse.results().stream()
+					.findFirst()
+					.map(dr -> new Book(dr));
+
+			System.out.printf("Libro encontrado: %s%n", bookOp.get());
 		} else {
 			System.out.println("No ha ingresado ningún título. Intente de nuevo.");
 		}
